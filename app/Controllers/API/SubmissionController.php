@@ -67,12 +67,12 @@ class SubmissionController extends BaseController
                 ->select([
                     'submissions.*',
                     'submission_status.status_name as status_name',
-                    'requester.name as request_user_name',
-                    'approval_atasan.name as atasan_name',
-                    'approval_hrd.name as hrd_name',
-                    'authenticator.name as authenticator_name',
-                    'need_revision.name as need_revision_name',
-                    'rejector.name as rejector_name',
+                    'requester.username as request_user_username',
+                    'approval_atasan.username as atasan_username',
+                    'approval_hrd.username as hrd_username',
+                    'authenticator.username as authenticator_username',
+                    'need_revision.username as need_revision_username',
+                    'rejector.username as rejector_username',
                 ])
                 ->join('submission_status', 'submission_status.id = submissions.status', 'left')
                 ->join('users as requester', 'requester.id = submissions.request_user_id', 'left')
