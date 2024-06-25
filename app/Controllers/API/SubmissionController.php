@@ -60,7 +60,30 @@ class SubmissionController extends BaseController
     {
         try {
             $submissionModel = new \App\Models\SubmissionModel();
-            $data = $submissionModel->find($id);
+
+            $builder = $submissionModel->builder();
+
+            $data = $builder
+                ->select([
+                    'submissions.*',
+                    'submission_status.status_name as status_name',
+                    'requester.name as request_user_name',
+                    'approval_atasan.name as atasan_name',
+                    'approval_hrd.name as hrd_name',
+                    'authenticator.name as authenticator_name',
+                    'need_revision.name as need_revision_name',
+                    'rejector.name as rejector_name',
+                ])
+                ->join('submission_status', 'submission_status.id = submissions.status', 'left')
+                ->join('users as requester', 'requester.id = submissions.request_user_id', 'left')
+                ->join('users as approval_atasan', 'approval_atasan.id = submissions.approval_one_user_id', 'left')
+                ->join('users as approval_hrd', 'approval_hrd.id = submissions.approval_two_user_id', 'left')
+                ->join('users as authenticator', 'authenticator.id = submissions.authenticator_user_id', 'left')
+                ->join('users as need_revision', 'need_revision.id = submissions.need_revision_user_id', 'left')
+                ->join('users as rejector', 'rejector.id = submissions.rejected_user_id', 'left')
+                ->where('submissions.id', $id)
+                ->get()->getRow();
+
             return $this->response->setJSON([
                 'status' => 200,
                 'error' => null,
