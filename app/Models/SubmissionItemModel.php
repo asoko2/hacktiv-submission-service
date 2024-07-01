@@ -6,13 +6,13 @@ use CodeIgniter\Model;
 
 class SubmissionItemModel extends Model
 {
-    protected $table            = 'submissionitems';
+    protected $table            = 'submission_items';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = ['name', 'qty', 'price', 'total_price', 'submission_id'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

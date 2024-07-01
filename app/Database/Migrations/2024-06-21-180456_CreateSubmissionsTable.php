@@ -19,10 +19,6 @@ class CreateSubmissionsTable extends Migration
                 'type' => 'INT',
                 'constraint' => 4,
             ],
-            'semester' => [
-                'type' => 'VARCHAR',
-                'constraint' => 100,
-            ],
             'name' => [
                 'type' => 'VARCHAR',
                 'constraint' => 255,
@@ -41,6 +37,7 @@ class CreateSubmissionsTable extends Migration
                 'type' => 'INT',
                 'constraint' => 1,
                 'default' => 1,
+                'null' => true,
             ],
             'request_user_id' => [
                 'type' => 'INT',
@@ -80,14 +77,17 @@ class CreateSubmissionsTable extends Migration
             'total_qty' => [
                 'type' => 'INT',
                 'constraint' => 11,
+                'null' => true,
             ],
             'total_item' => [
                 'type' => 'INT',
                 'constraint' => 11,
+                'null' => true,
             ],
             'total_price' => [
                 'type' => 'INT',
                 'constraint' => 11,
+                'null' => true,
             ],
             'invoice_dir' => [
                 'type' => 'VARCHAR',

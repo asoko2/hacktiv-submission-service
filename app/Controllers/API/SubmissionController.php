@@ -40,20 +40,76 @@ class SubmissionController extends BaseController
             ]);
         }
 
+        $submissionId = 0;
+
         try {
-            $submissionModel->insert($data);
+            $submissionModel->insert([
+                'request_user_id' => $data->request_user_id,
+                'year' => $data->year,
+                'name' => $data->name,
+            ]);
+
+            $submissionId = $submissionModel->getInsertID();
+
+        } catch (\Throwable $th) {
+            return $this->response->setJSON([
+                'status' => 500,
+                'error' => json_encode($submissionModel->errors()) . json_encode($th->getMessage()),
+                'message' => 'Submission Request failed',
+            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $total_price = 0;
+        $total_qty = 0;
+        $total_item = 0;
+
+        foreach ($data->submissionItems as $item) {
+            $submissionItemModel = new \App\Models\SubmissionItemModel();
+
+            try {
+                $submissionItemModel->insert([
+                    'submission_id' => $submissionId,
+                    'name' => $item->itemName,
+                    'qty' => $item->qty,
+                    'price' => $item->price,
+                    'total_price' => $item->total,
+                ]);
+
+                $total_price += $item->total;
+                $total_qty += $item->qty;
+                $total_item++;
+            } catch (\Throwable $th) {
+                return $this->response->setJSON(
+                    [
+                        'status' => 500,
+                        'error' => json_encode($submissionItemModel->errors()) . json_encode($th->getMessage()),
+                        'message' => 'Submission Request failed',
+                    ]
+                )->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        try {
+            $submissionModel->update($submissionId, [
+                'total_price' => $total_price,
+                'total_qty' => $total_qty,
+                'total_item' => $total_item,
+            ]);
             return $this->response->setJSON([
                 'status' => 200,
                 'error' => null,
                 'message' => 'Submission Request created',
-            ]);
+            ])->setStatusCode(ResponseInterface::HTTP_CREATED);
+
         } catch (\Throwable $th) {
             return $this->response->setJSON([
                 'status' => 500,
-                'error' => $submissionModel->errors(),
+                'error' => json_encode($submissionModel->errors()) . json_encode($th->getMessage()),
                 'message' => 'Submission Request failed',
-            ]);
+            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+
     }
 
     public function show($id = null)
@@ -356,6 +412,46 @@ class SubmissionController extends BaseController
                 'status' => 500,
                 'error' => $e->getMessage(),
                 'message' => 'Submission Request failed',
+            ]);
+        }
+    }
+
+    public function showByUser($id)
+    {
+        $submissionModel = new \App\Models\SubmissionModel();
+        $data = $submissionModel
+        ->select([
+            'submissions.*',
+            'submission_status.status_name as status_name',
+            'requester.username as request_user_username',
+            'approval_atasan.username as atasan_username',
+            'approval_hrd.username as hrd_username',
+            'authenticator.username as authenticator_username',
+            'need_revision.username as need_revision_username',
+            'rejector.username as rejector_username',
+        ])
+        ->join('submission_status', 'submission_status.id = submissions.status', 'left')
+        ->join('users as requester', 'requester.id = submissions.request_user_id', 'left')
+        ->join('users as approval_atasan', 'approval_atasan.id = submissions.approval_one_user_id', 'left')
+        ->join('users as approval_hrd', 'approval_hrd.id = submissions.approval_two_user_id', 'left')
+        ->join('users as authenticator', 'authenticator.id = submissions.authenticator_user_id', 'left')
+        ->join('users as need_revision', 'need_revision.id = submissions.need_revision_user_id', 'left')
+        ->join('users as rejector', 'rejector.id = submissions.rejected_user_id', 'left')
+        ->where('request_user_id', $id)->findAll();
+
+        if ($data) {
+            return $this->response->setJSON([
+                'status' => 200,
+                'error' => null,
+                'message' => 'Data found',
+                'data' => $data
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 500,
+                'error' => null,
+                'message' => 'Data not found',
+                'data' => null
             ]);
         }
     }

@@ -15,6 +15,8 @@ $routes->group('api', function ($routes) {
     $routes->post('/', [SubmissionController::class, 'store']);
     $routes->get('(:segment)', [SubmissionController::class, 'show/$1']);
     $routes->delete('(:segment)', [SubmissionController::class, 'destroy/$1']);
+
+    $routes->get('users/(:segment)', [SubmissionController::class, 'showByUser/$1']);
     
     $routes->put('(:segment)/approval-atasan', [SubmissionController::class, 'approvalAtasan/$1']);
     $routes->put('(:segment)/approval-hrd', [SubmissionController::class, 'approvalHRD/$1']);

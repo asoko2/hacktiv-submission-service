@@ -14,7 +14,6 @@ class SubmissionModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'year',
-        'semester',
         'name',
         'request_user_id',
         'reason_rejected',
