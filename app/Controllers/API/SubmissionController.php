@@ -448,10 +448,10 @@ class SubmissionController extends BaseController
             ]);
         } else {
             return $this->response->setJSON([
-                'status' => 500,
+                'status' => 200,
                 'error' => null,
                 'message' => 'Data not found',
-                'data' => null
+                'data' => new \stdClass
             ]);
         }
     }
