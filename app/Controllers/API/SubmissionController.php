@@ -420,24 +420,24 @@ class SubmissionController extends BaseController
     {
         $submissionModel = new \App\Models\SubmissionModel();
         $data = $submissionModel
-        ->select([
-            'submissions.*',
-            'submission_status.status_name as status_name',
-            'requester.username as request_user_username',
-            'approval_atasan.username as atasan_username',
-            'approval_hrd.username as hrd_username',
-            'authenticator.username as authenticator_username',
-            'need_revision.username as need_revision_username',
-            'rejector.username as rejector_username',
-        ])
-        ->join('submission_status', 'submission_status.id = submissions.status', 'left')
-        ->join('users as requester', 'requester.id = submissions.request_user_id', 'left')
-        ->join('users as approval_atasan', 'approval_atasan.id = submissions.approval_one_user_id', 'left')
-        ->join('users as approval_hrd', 'approval_hrd.id = submissions.approval_two_user_id', 'left')
-        ->join('users as authenticator', 'authenticator.id = submissions.authenticator_user_id', 'left')
-        ->join('users as need_revision', 'need_revision.id = submissions.need_revision_user_id', 'left')
-        ->join('users as rejector', 'rejector.id = submissions.rejected_user_id', 'left')
-        ->where('request_user_id', $id)->findAll();
+            ->select([
+                'submissions.*',
+                'submission_status.status_name as status_name',
+                'requester.username as request_user_username',
+                'approval_atasan.username as atasan_username',
+                'approval_hrd.username as hrd_username',
+                'authenticator.username as authenticator_username',
+                'need_revision.username as need_revision_username',
+                'rejector.username as rejector_username',
+            ])
+            ->join('submission_status', 'submission_status.id = submissions.status', 'left')
+            ->join('users as requester', 'requester.id = submissions.request_user_id', 'left')
+            ->join('users as approval_atasan', 'approval_atasan.id = submissions.approval_one_user_id', 'left')
+            ->join('users as approval_hrd', 'approval_hrd.id = submissions.approval_two_user_id', 'left')
+            ->join('users as authenticator', 'authenticator.id = submissions.authenticator_user_id', 'left')
+            ->join('users as need_revision', 'need_revision.id = submissions.need_revision_user_id', 'left')
+            ->join('users as rejector', 'rejector.id = submissions.rejected_user_id', 'left')
+            ->where('request_user_id', $id)->findAll();
 
         if ($data) {
             return $this->response->setJSON([
@@ -445,6 +445,47 @@ class SubmissionController extends BaseController
                 'error' => null,
                 'message' => 'Data found',
                 'data' => $data
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 200,
+                'error' => null,
+                'message' => 'Data not found',
+                'data' => new \stdClass
+            ]);
+        }
+    }
+
+    public function showItems($id)
+    {
+        $submissionModel = new \App\Models\SubmissionModel();
+        $submissionItemModel = new \App\Models\SubmissionItemModel();
+
+        $submission = $submissionModel->find($id);
+
+        $data = $submissionItemModel->where('submission_id', $id)->findAll();
+
+        $items = [];
+
+        foreach ($data as $item) {
+            $items[] = [
+                'id' => $item['id'],
+                'itemName' => $item['name'],
+                'qty' => $item['qty'],
+                'price' => $item['price'],
+                'total' => $item['total_price'],
+            ];
+        }
+
+        if ($data) {
+            return $this->response->setJSON([
+                'status' => 200,
+                'error' => null,
+                'message' => 'Data found',
+                'data' => [
+                    'submission' => $submission,
+                    'items' => $items
+                ]
             ]);
         } else {
             return $this->response->setJSON([
