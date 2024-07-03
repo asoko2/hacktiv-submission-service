@@ -34,7 +34,7 @@ class Validation extends BaseConfig
      * @var array<string, string>
      */
     public array $templates = [
-        'list'   => 'CodeIgniter\Validation\Views\list',
+        'list' => 'CodeIgniter\Validation\Views\list',
         'single' => 'CodeIgniter\Validation\Views\single',
     ];
 
@@ -93,6 +93,22 @@ class Validation extends BaseConfig
         ],
         'invoice_dir' => [
             'permit_empty' => 'Invoice Dir field must be a string',
+        ],
+    ];
+
+    public array $update_submission = [
+        'year' => 'required|numeric',
+        'name' => 'required',
+    ];
+
+    public array $update_submission_error = [
+        'year' => [
+            'required' => 'Year field is required',
+            'numeric' => 'Year field must be a number',
+        ],
+        'name' => [
+            'required' => 'Name field is required',
+            'string' => 'Name field must be a string',
         ],
     ];
 

@@ -17,7 +17,7 @@ class SubmissionController extends BaseController
     public function index()
     {
         $model = new \App\Models\SubmissionModel();
-        $data = $model->findAll();
+        $data = $model->orderBy('id', 'asc')->findAll();
         return $this->response->setJSON([
             'status' => 200,
             'error' => null,
@@ -156,11 +156,11 @@ class SubmissionController extends BaseController
     }
 
 
-    public function updateSubmission($id = null)
+    public function update($id = null)
     {
         $submissionModel = new \App\Models\SubmissionModel();
         $data = $this->request->getJSON();
-        $this->validation->setRuleGroup('create_submission');
+        $this->validation->setRuleGroup('update_submission');
 
         if (!$this->validation->withRequest($this->request)->run()) {
             return $this->response->setJSON([
@@ -437,7 +437,9 @@ class SubmissionController extends BaseController
             ->join('users as authenticator', 'authenticator.id = submissions.authenticator_user_id', 'left')
             ->join('users as need_revision', 'need_revision.id = submissions.need_revision_user_id', 'left')
             ->join('users as rejector', 'rejector.id = submissions.rejected_user_id', 'left')
-            ->where('request_user_id', $id)->findAll();
+            ->where('request_user_id', $id)
+            ->orderBy('id', 'asc')
+            ->findAll();
 
         if ($data) {
             return $this->response->setJSON([
@@ -445,47 +447,6 @@ class SubmissionController extends BaseController
                 'error' => null,
                 'message' => 'Data found',
                 'data' => $data
-            ]);
-        } else {
-            return $this->response->setJSON([
-                'status' => 200,
-                'error' => null,
-                'message' => 'Data not found',
-                'data' => new \stdClass
-            ]);
-        }
-    }
-
-    public function showItems($id)
-    {
-        $submissionModel = new \App\Models\SubmissionModel();
-        $submissionItemModel = new \App\Models\SubmissionItemModel();
-
-        $submission = $submissionModel->find($id);
-
-        $data = $submissionItemModel->where('submission_id', $id)->findAll();
-
-        $items = [];
-
-        foreach ($data as $item) {
-            $items[] = [
-                'id' => $item['id'],
-                'itemName' => $item['name'],
-                'qty' => $item['qty'],
-                'price' => $item['price'],
-                'total' => $item['total_price'],
-            ];
-        }
-
-        if ($data) {
-            return $this->response->setJSON([
-                'status' => 200,
-                'error' => null,
-                'message' => 'Data found',
-                'data' => [
-                    'submission' => $submission,
-                    'items' => $items
-                ]
             ]);
         } else {
             return $this->response->setJSON([
